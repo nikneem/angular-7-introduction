@@ -1,3 +1,8 @@
+<app-name-filter
+  (filterChanged)="setNameFilter($event)"
+  [filterValue]="filter.name"
+></app-name-filter>
+
 <table
   mat-table
   [dataSource]="contactData"

@@ -87,7 +87,11 @@ namespace FilterDemoApp.Controllers
             }
             if (!string.IsNullOrWhiteSpace(filter.Name))
             {
-                predicate = predicate.And(flt => flt.Street.Contains(filter.Address));
+                var nameFilter = PredicateBuilder.New<ContactInfoEntity>()
+                    .Or(x => x.FirstName.Contains(filter.Name))
+                    .Or(x => x.LastName.Contains(filter.Name))
+                    .Or(x => x.MiddleName.Contains(filter.Name));
+                predicate = predicate.And(nameFilter);
             }
 
             return predicate;

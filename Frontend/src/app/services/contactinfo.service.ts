@@ -11,7 +11,6 @@ export class ContactinfoService {
   constructor(private http: HttpClient) {}
 
   public get(filter: ContactFilterDto): Observable<Array<ContactDto>> {
-    debugger;
     const url = `${
       environment.backendUrl
     }/api/contactinfo${this.generateQuerystring(filter)}`;
