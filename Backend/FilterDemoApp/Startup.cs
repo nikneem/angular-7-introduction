@@ -22,6 +22,7 @@ namespace FilterDemoApp
             Configuration = configuration;
         }
 
+        readonly string defaultCorsPolicyName = "allow_specific_origins";
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -33,6 +34,18 @@ namespace FilterDemoApp
                     options.UseSqlServer(connectionString)
                         .UseInternalServiceProvider(serviceProvider)
                 );
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(defaultCorsPolicyName,
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:4200")
+                            .WithHeaders("Content-Type", "Authorization", "Accept")
+                            .WithMethods("OPTIONS", "TRACE", "GET", "HEAD", "POST", "PUT")
+                            .WithExposedHeaders("X-Pagination");
+                    });
+            });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -49,7 +62,7 @@ namespace FilterDemoApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            app.UseCors(defaultCorsPolicyName);
             app.UseHttpsRedirection();
             app.UseMvc();
         }
