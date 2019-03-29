@@ -1,0 +1,28 @@
+<mat-card>
+  <div class="filters">
+    <div class="filter">
+      <div class="filter-input">
+        <app-name-filter
+          (filterChanged)="setNameFilter($event)"
+          [filterValue]="filter.name"
+        >
+        </app-name-filter>
+      </div>
+      <div class="filter-input">
+        <app-address-filter
+          (filterChanged)="setAddressFilter($event)"
+          [filterValue]="filter.address"
+        >
+        </app-address-filter>
+      </div>
+    </div>
+    <div class="filter">
+      <app-daterange-filter
+        [fromDate]="filter.dateFrom"
+        [toDate]="filter.dateTo"
+        (filterChanged)="setDateRangeFilter($event)"
+      >
+      </app-daterange-filter>
+    </div>
+  </div>
+</mat-card>

@@ -1,0 +1,159 @@
+// Modify home, so contacts can be shown
+Add the DTO client-side
+export class ContactDto {
+  public businessEntityID: number;
+  public firstName: string;
+  public lastName: string;
+  public iddleName: string;
+  public telephoneNumber: string;
+  public street: string;
+  public city: string;
+  public stateProvince: string;
+  public postalCode: string;
+  public countryRegion: string;
+  public eMailAddress: string;
+  public modifiedDate: Date;
+
+  constructor(init?: Partial<ContactDto>) {
+    Object.assign(this, init);
+  }
+}
+
+Add array to home
+  public contactData: Array<ContactDto> = [
+    new ContactDto({
+      businessEntityID: 293,
+      firstName: 'Catherine',
+      lastName: 'Abel',
+      middleName: 'R.',
+      telephoneNumber: '206-555-2222',
+      street: 'P.O Box 5',
+      city: 'Edmonds',
+      stateProvince: 'WA',
+      postalCode: '98431',
+      countryRegion: 'USA',
+      eMailAddress: 'Joe@sample.com',
+      modifiedDate: new Date('2015-04-15T16:33:33.077')
+    }),
+    new ContactDto({
+      businessEntityID: 295,
+      firstName: 'Kim',
+      lastName: 'Abercrombie',
+      middleName: null,
+      telephoneNumber: '605-555-9877',
+      street: '990 5th Avenue',
+      city: 'Redmond',
+      stateProvince: 'WA',
+      postalCode: '98052',
+      countryRegion: 'USA',
+      eMailAddress: 'Customer3@sample.com',
+      modifiedDate: new Date('2015-04-15T16:33:33.077')
+    })
+  ];
+  displayedColumns: string[] = [
+    'businessEntityID',
+    'firstName',
+    'lastName',
+    'street',
+    'postalCode'
+  ];
+
+
+
+
+Add a table to home
+<table mat-table [dataSource]="contactData" class="mat-elevation-z8 full-width">
+  <ng-container matColumnDef="businessEntityID">
+    <th mat-header-cell *matHeaderCellDef>ID</th>
+    <td mat-cell *matCellDef="let element">{{ element.businessEntityID }}</td>
+  </ng-container>
+  <ng-container matColumnDef="firstName">
+    <th mat-header-cell *matHeaderCellDef>First</th>
+    <td mat-cell *matCellDef="let element">{{ element.firstName }}</td>
+  </ng-container>
+  <ng-container matColumnDef="lastName">
+    <th mat-header-cell *matHeaderCellDef>Last</th>
+    <td mat-cell *matCellDef="let element">{{ element.lastName }}</td>
+  </ng-container>
+  <ng-container matColumnDef="street">
+    <th mat-header-cell *matHeaderCellDef>Street</th>
+    <td mat-cell *matCellDef="let element">{{ element.street }}</td>
+  </ng-container>
+  <ng-container matColumnDef="postalCode">
+    <th mat-header-cell *matHeaderCellDef>Postal</th>
+    <td mat-cell *matCellDef="let element">{{ element.postalCode }}</td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
+
+
+
+
+
+
+Introduce the backend project and show is running
+
+Add the backend url to environment:
+https://localhost:44358
+
+
+
+
+Add the filter module client side
+export class ContactFilterDto {
+  public sort: string;
+  public page: number;
+  public pageSize: number;
+  public name: string;
+  public address: string;
+  public dateFrom: Date;
+  public dateTo: Date;
+
+  constructor(init?: Partial<ContactFilterDto>) {
+    Object.assign(this, init);
+  }
+}
+
+
+
+Create a service
+ng g service services/contactinfo
+
+// Add generation of qs
+  private generateQuerystring(filter: ContactFilterDto): string {
+    if (!filter) {
+      return null;
+    }
+    let qs = `?page=${filter.page}`;
+    if (filter.pageSize > 0) {
+      qs = qs + `&pageSize=${filter.pageSize}`;
+    }
+    if (filter.address) {
+      qs = qs + `&address=${filter.address}`;
+    }
+    if (filter.name) {
+      qs = qs + `&name=${filter.name}`;
+    }
+    if (filter.sort) {
+      qs = qs + `&sort=${filter.sort}`;
+    }
+    if (filter.dateFrom) {
+      qs = qs + `&dateFrom=${filter.dateFrom}`;
+    }
+    if (filter.dateTo) {
+      qs = qs + `&dateTo=${filter.dateTo}`;
+    }
+    return qs;
+  }
+
+add get method
+  public get(filter: ContactFilterDto): Observable<Array<ContactDto>> {
+    const url = `${
+      environment.backendUrl
+    }/api/contactinfo${this.generateQuerystring(filter)}`;
+
+    return this.http.get<Array<ContactDto>>(url);
+  }
+
+Call loading the data from service in home
