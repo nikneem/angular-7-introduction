@@ -122,3 +122,5 @@ Import more modules :
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
+Import a default style
+@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
