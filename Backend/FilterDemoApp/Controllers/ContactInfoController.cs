@@ -93,6 +93,16 @@ namespace FilterDemoApp.Controllers
                     .Or(x => x.MiddleName.Contains(filter.Name));
                 predicate = predicate.And(nameFilter);
             }
+            if (filter.DateFrom.HasValue)
+            {
+                var date = filter.DateFrom.Value.LocalDateTime;
+                predicate = predicate.And(ent => ent.ModifiedDate >= date);
+            }
+            if (filter.DateTo.HasValue)
+            {
+                var date = filter.DateTo.Value.LocalDateTime.AddDays(1);
+                predicate = predicate.And(ent => ent.ModifiedDate < date);
+            }
 
             return predicate;
 

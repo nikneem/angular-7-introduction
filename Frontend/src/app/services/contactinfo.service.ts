@@ -19,27 +19,38 @@ export class ContactinfoService {
   }
 
   private generateQuerystring(filter: ContactFilterDto): string {
+    let splitCharacter = '?';
+    let qs = '';
     if (!filter) {
       return '';
     }
-    let qs = `?page=${filter.page}`;
+    if (filter.page) {
+      qs = qs + `${splitCharacter}page=${filter.page}`;
+      splitCharacter = '&';
+    }
     if (filter.pageSize > 0) {
-      qs = qs + `&pageSize=${filter.pageSize}`;
+      qs = qs + `${splitCharacter}pageSize=${filter.pageSize}`;
+      splitCharacter = '&';
     }
     if (filter.address) {
-      qs = qs + `&address=${filter.address}`;
+      qs = qs + `${splitCharacter}address=${filter.address}`;
+      splitCharacter = '&';
     }
     if (filter.name) {
-      qs = qs + `&name=${filter.name}`;
+      qs = qs + `${splitCharacter}name=${filter.name}`;
+      splitCharacter = '&';
     }
     if (filter.sort) {
-      qs = qs + `&sort=${filter.sort}`;
+      qs = qs + `${splitCharacter}sort=${filter.sort}`;
+      splitCharacter = '&';
     }
-    if (filter.dateFrom) {
-      qs = qs + `&dateFrom=${filter.dateFrom}`;
+    if (filter.dateFrom && filter.dateFrom instanceof Date) {
+      qs = qs + `${splitCharacter}dateFrom=${filter.dateFrom.toISOString()}`;
+      splitCharacter = '&';
     }
     if (filter.dateTo) {
-      qs = qs + `&dateTo=${filter.dateTo}`;
+      qs = qs + `${splitCharacter}dateTo=${filter.dateTo.toISOString()}`;
+      splitCharacter = '&';
     }
     return qs;
   }

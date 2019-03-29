@@ -30,3 +30,12 @@ export class ContactFilterDto {
     Object.assign(this, init);
   }
 }
+
+export class DateRangeDto {
+  public from?: Date;
+  public to?: Date;
+
+  constructor(init?: Partial<DateRangeDto>) {
+    Object.assign(this, init);
+  }
+}

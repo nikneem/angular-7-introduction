@@ -1,7 +1,15 @@
+import * as _ from 'lodash';
 import { Component, OnInit } from '@angular/core';
 import { ContactinfoService } from 'src/app/services/contactinfo.service';
 import { ContactDto, ContactFilterDto } from 'src/app/models/contact.models';
 import { ActivatedRoute, Router, Params } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/state/app.state';
+import {
+  SetInitialFilter,
+  FetchContacts
+} from 'src/app/state/contacts/contact.actions';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-homepage',
@@ -9,59 +17,80 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
   styleUrls: ['./homepage.component.scss']
 })
 export class HomepageComponent implements OnInit {
-  private filter: ContactFilterDto;
+  public filter: ContactFilterDto;
   public contactData: Array<ContactDto>;
   displayedColumns: string[] = [
     'businessEntityID',
     'firstName',
     'lastName',
     'street',
-    'postalCode'
+    'postalCode',
+    'modifiedDate'
   ];
 
   constructor(
-    private service: ContactinfoService,
     private activatedRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private store: Store<AppState>
   ) {
-    this.filter = new ContactFilterDto({ pageSize: 5, page: 1 });
-  }
-
-  setNameFilter(value) {
-    this.filter.name = value === '' ? undefined : value;
-    this.updateParams();
-    this.loadContacts();
-  }
-
-  private loadContacts() {
     const self = this;
-    self.service.get(self.filter).subscribe(data => {
-      self.contactData = data;
-    });
+    self.store
+      .select(str => str.contactState.listItems)
+      .subscribe(items => (self.contactData = items));
+    self.store
+      .select(str => str.contactState.filter)
+      .subscribe(filter => {
+        if (filter) {
+          const isEqual = _.isEqual(filter, this.filter);
+          if (!isEqual) {
+            self.store.dispatch(new FetchContacts(filter));
+            self.updateParams(filter);
+          }
+          this.filter = filter;
+        }
+      });
   }
 
   ngOnInit() {
-    this.activatedRoute.queryParams.subscribe(params => {
-      this.filter = Object.assign(this.filter, params);
-      if (this.filter.page <= 1) {
-        this.filter.page = 1;
-      }
-      if (this.filter.pageSize <= 1) {
-        this.filter.pageSize = 5;
-      }
-    });
-    this.loadContacts();
+    const params = this.activatedRoute.snapshot.queryParams;
+    this.readParameters(params);
   }
 
-  updateParams() {
+  readParameters(params) {
+    const filters = Object.assign(new ContactFilterDto(), params);
+    if (filters.dateFrom) {
+      filters.dateFrom = new Date(Date.parse(params.dateFrom));
+      if (!this.isValidDate(filters.dateFrom)) {
+        filters.dateFrom = undefined;
+      }
+    }
+    if (filters.dateTo) {
+      filters.dateTo = new Date(Date.parse(params.dateTo));
+      if (!this.isValidDate(filters.dateTo)) {
+        filters.dateTo = undefined;
+      }
+    }
+    if (filters.page <= 1) {
+      filters.page = 1;
+    }
+    if (filters.pageSize <= 1) {
+      filters.pageSize = 5;
+    }
+    this.store.dispatch(new SetInitialFilter(filters));
+  }
+
+  updateParams(filter: ContactFilterDto) {
     const p: Params = {
-      name: this.filter.name,
-      address: this.filter.address,
-      dateFrom: this.filter.dateFrom,
-      dateTo: this.filter.dateTo,
-      sort: this.filter.sort,
-      page: this.filter.page,
-      pageSize: this.filter.pageSize
+      name: filter.name && filter.name.length > 0 ? filter.name : undefined,
+      address:
+        filter.address && filter.address.length > 0
+          ? filter.address
+          : undefined,
+      dateFrom: filter.dateFrom ? filter.dateFrom.toISOString() : undefined,
+      dateTo: filter.dateTo ? filter.dateTo.toISOString() : undefined,
+      sort: filter.sort && filter.sort.length > 0 ? filter.sort : undefined,
+      page: filter.page,
+      pageSize: filter.pageSize
     };
 
     this.router.navigate([], {
@@ -69,5 +98,9 @@ export class HomepageComponent implements OnInit {
       queryParams: p,
       queryParamsHandling: 'merge' // remove to replace all query params by provided
     });
+  }
+
+  isValidDate(date: Date): boolean {
+    return date instanceof Date && !isNaN(date.getTime());
   }
 }

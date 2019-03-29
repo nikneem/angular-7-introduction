@@ -15,7 +15,8 @@ namespace FilterDemoApp.Models
         [JsonProperty("name")] public string Name { get; set; }
         [JsonProperty("address")] public string Address { get; set; }
         [JsonProperty("city")] public string City { get; set; }
-        [JsonProperty("date")] public DateTimeOffset Date { get; set; }
+        [JsonProperty("dateFrom")] public DateTimeOffset? DateFrom { get; set; }
+        [JsonProperty("dateTo")] public DateTimeOffset? DateTo { get; set; }
 
     }
 }

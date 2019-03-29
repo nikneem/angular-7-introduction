@@ -1,11 +1,10 @@
-<label for="name-filter">Name filter</label>
+<label for="name-filter">Address filter</label>
 <mat-form-field class="input-width">
   <input
-    id="name-filter"
     matInput
     #nameFilter
     type="text"
-    placeholder="Part of the name"
+    placeholder="Part of the address"
     [(ngModel)]="filterValue"
     (keyup.enter)="update(nameFilter.value)"
     (blur)="update(nameFilter.value)"
