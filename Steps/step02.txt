@@ -156,3 +156,4 @@ add get method
     return this.http.get<Array<ContactDto>>(url);
   }
 
+Call loading the data from service in home
